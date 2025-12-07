@@ -95,23 +95,33 @@
     .tabs.is-toggle li {
         flex-grow: 1;
         flex-shrink: 0;
+        min-width: 120px;
+    }
+    .tabs.is-toggle li a {
+        flex-direction: column;
+        padding: 8px 10px;
+        min-height: 60px;
+        justify-content: center;
+    }
+    .tabs.is-toggle li a > span:not(.tab-badge) {
+        display: block;
     }
     
     /* Tab Badges */
     .tab-badge {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         background-color: #eee;
         color: #333;
         border-radius: 4px;
-        padding: 2px 6px;
-        margin-left: 8px;
-        max-width: 100px;
+        padding: 2px 8px;
+        margin-left: 0;
+        margin-top: 4px;
+        max-width: 100%;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         font-weight: normal;
-        display: inline-block;
-        vertical-align: middle;
+        display: block;
     }
     .tabs.is-toggle li.is-active .tab-badge {
         background-color: rgba(255,255,255,0.3);
@@ -138,21 +148,42 @@
         display: block;
     }
 
-    /* Scene Buttons */
-    .btn-group {
+    /* Scene Grid Selector */
+    .scene-grid {
         display: flex;
-        justify-content: center;
+        flex-direction: column;
         gap: 10px;
+        margin-bottom: 25px;
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #eee;
+    }
+    .scene-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .scene-row-label {
+        width: 140px;
+        font-weight: 600;
+        text-align: right;
+        font-size: 0.9rem;
+        color: #555;
+    }
+    .scene-row-buttons {
+        display: flex;
+        gap: 8px;
         flex-wrap: wrap;
-        margin-bottom: 15px; /* Added spacing below scene selector */
     }
     .btn-scene {
         background-color: #fff;
         border: 1px solid #dbdbdb;
         color: #363636;
         cursor: pointer;
-        padding: 8px 16px;
+        padding: 6px 12px;
         border-radius: 4px;
+        font-size: 0.9rem;
         font-weight: 600;
         transition: all 0.2s;
     }
@@ -176,7 +207,7 @@
     /* Debug/Helper text */
     .method-display-text {
         text-align: center;
-        font-size: 0.9em;
+        font-size: 0.8em;
         color: #888;
         margin-top: 5px;
         font-family: monospace;
@@ -256,17 +287,32 @@
   <div class="container is-max-desktop">
     <div class="hero-body">
       
-      <!-- Top: Scene Selection -->
-      <span class="control-label">1. Select Scene</span>
-      <div class="btn-group" id="scene-selector">
-          <button class="btn-scene is-active" onclick="setScene('Scene 1', this)">Scene 1</button>
-          <button class="btn-scene" onclick="setScene('Scene 2', this)">Scene 2</button>
-          <button class="btn-scene" onclick="setScene('Scene 3', this)">Scene 3</button>
+      <!-- Top: Scene Selection Grid -->
+      <span class="control-label">1. Select Dataset & Scene</span>
+      <div class="scene-grid">
+          <!-- Row 1: ACDC -->
+          <div class="scene-row">
+              <div class="scene-row-label">ACDC</div>
+              <div class="scene-row-buttons">
+                  <button class="btn-scene is-active" onclick="setScene('ACDC', 'Scene 1', this)">Scene 1</button>
+                  <button class="btn-scene" onclick="setScene('ACDC', 'Scene 2', this)">Scene 2</button>
+                  <button class="btn-scene" onclick="setScene('ACDC', 'Scene 3', this)">Scene 3</button>
+              </div>
+          </div>
+          <!-- Row 2: Foggy Cityscapes -->
+          <div class="scene-row">
+              <div class="scene-row-label">Foggy Cityscapes</div>
+              <div class="scene-row-buttons">
+                  <button class="btn-scene" onclick="setScene('Cityscapes', 'Frankfurt 1', this)">Frankfurt 1</button>
+                  <button class="btn-scene" onclick="setScene('Cityscapes', 'Lindau', this)">Lindau</button>
+                  <button class="btn-scene" onclick="setScene('Cityscapes', 'Frankfurt 2', this)">Frankfurt 2</button>
+              </div>
+          </div>
       </div>
 
       <!-- Middle: Display Area -->
       <div class="comparison-container">
-          <img id="main-display" src="" alt="Defogging Comparison" class="comparison-image">
+          <img id="main-display" src="" alt="Defogging Comparison" class="comparison-image" onerror="handleImageError(this)">
       </div>
       <div id="method-debug" class="method-display-text"></div>
 
@@ -288,7 +334,7 @@
                     <a>
                         <span class="icon is-small"><i class="fas fa-filter"></i></span>
                         <span>Filter</span>
-                        <span class="tab-badge" id="badge-filter-only">Filter A</span>
+                        <span class="tab-badge" id="badge-filter-only">CLAHE</span>
                     </a>
                 </li>
                 <li data-tab="model-only" onclick="setStrategy('model-only')">
@@ -312,6 +358,13 @@
                         <span class="tab-badge" id="badge-model-filter">Chain</span>
                     </a>
                 </li>
+                <li data-tab="vlm" onclick="setStrategy('vlm')">
+                    <a>
+                        <span class="icon is-small"><i class="fas fa-brain"></i></span>
+                        <span>Gen VLM</span>
+                        <span class="tab-badge" id="badge-vlm">NanoBan...</span>
+                    </a>
+                </li>
             </ul>
         </div>
 
@@ -323,89 +376,27 @@
       </div>
       
       <h2 class="subtitle has-text-centered" style="margin-top: 15px;">
-        <span class="dnerf">Comparison</span> of 30+ defogging pipelines.
+        <span class="dnerf">Comparison</span> of defogging pipelines on ACDC and Foggy Cityscapes datasets.
       </h2>
     </div>
   </div>
 </section>
 
-
+<!-- ... (Rest of sections: Abstract, Quantitative Results, BibTeX, Footer) ... -->
 <section class="section">
-  <div class="container is-max-desktop">
-    <!-- Abstract. -->
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
-        <h2 class="title is-3">Abstract</h2>
-        <div class="content has-text-justified">
-          <p>
-            Autonomous driving perception systems are particularly vulnerable in foggy conditions, where light scattering reduces contrast and obscures fine details critical for safe operation. While numerous defogging methods exist—from handcrafted filters to learned restoration models—improvements in image fidelity do not consistently translate into better downstream detection and segmentation.
-          </p>
-          <p>
-            We present a structured empirical study that benchmarks a comprehensive set of pipelines, including (i) classical filters, (ii) modern defogging networks, (iii) chained variants, and (iv) prompt-driven visual-language image editing models (VLM) applied directly to foggy images. Using Foggy Cityscapes, we assess both image quality and downstream performance on object detection (mAP) and segmentation (PQ, RQ, SQ).
-          </p>
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              Autonomous driving perception systems are particularly vulnerable in foggy conditions...
+            </p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 </section>
-
-
-<section class="section">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered">Quantitative Results</h2>
-    <div class="content">
-      <div class="table-container">
-        <table class="results-table">
-          <thead>
-            <tr>
-              <th>Method</th>
-              <th>mAP</th>
-              <th>PQ</th>
-              <th>RQ</th>
-              <th>SQ</th>
-              <th>Qual. Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="background-color: #e8f5e9; font-weight: bold;">
-              <td>Ground Truth (GT)</td>
-              <td>0.2560</td>
-              <td>100.0</td>
-              <td>100.0</td>
-              <td>100.0</td>
-              <td>34.81</td>
-            </tr>
-            <tr>
-              <td>DehazeFormer Trained</td>
-              <td>0.2557</td>
-              <td>74.4</td>
-              <td>83.9</td>
-              <td>88.4</td>
-              <td>29.74</td>
-            </tr>
-            <tr>
-              <td>DehazeFormer Untrained</td>
-              <td>0.2379</td>
-              <td>63.0</td>
-              <td>74.2</td>
-              <td>84.6</td>
-              <td>24.20</td>
-            </tr>
-            <tr>
-              <td>Flux (CoT)</td>
-              <td>0.2376</td>
-              <td>59.7</td>
-              <td>82.8</td>
-              <td>71.7</td>
-              <td>26.19</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</section>
-
 
 <section class="section" id="BibTeX">
   <div class="container is-max-desktop content">
@@ -419,35 +410,55 @@
   </div>
 </section>
 
-
 <footer class="footer">
-  <div class="container">
-    <div class="content has-text-centered">
-      <a class="icon-link" href="https://arxiv.org/abs/2510.03906">
-        <i class="fas fa-file-pdf"></i>
-      </a>
-      <a class="icon-link" href="https://github.com/prazmara/defog-detection-benchmark">
-        <i class="fab fa-github"></i>
-      </a>
-    </div>
-    <div class="columns is-centered">
-      <div class="column is-8">
-        <div class="content">
-          <p>
-            This website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
-          </p>
-        </div>
+    <div class="container">
+      <div class="content has-text-centered">
+        <p>Licensed under CC-BY-SA 4.0.</p>
       </div>
     </div>
-  </div>
 </footer>
 
 <script>
-    // --- Configuration ---
-    const filters = ['Filter A', 'Filter B', 'Filter C', 'Filter D'];
-    const models = ['DehazeFormer', 'Flux (CoT)', 'Model C'];
-    const scenes = ['Scene 1', 'Scene 2', 'Scene 3'];
+    // --- Data Definitions ---
+    
+    // Method Definitions with Label -> Folder Name mapping
+    const methodMap = {
+        // Filters
+        'CLAHE': 'clh',
+        'DCP': 'dcp',
+        'MSR': 'msr',
+        
+        // Models
+        'DehazeFormer (Base)': 'dhf',
+        'DehazeFormer (Retrained)': 'dhft',
+        'FocalNet': 'fcn',
+        'Flux': 'flux',
+        'MITNet': 'mit',
+        
+        // VLMs
+        'NanoBanana': 'nanobanana',
+        'Flux + CoT': 'flux_cot'
+    };
+    
+    // Reverse map for labels
+    const filters = ['CLAHE', 'DCP', 'MSR'];
+    const models = ['DehazeFormer (Base)', 'DehazeFormer (Retrained)', 'FocalNet', 'MITNet'];
+    const vlms = ['NanoBanana', 'Flux + CoT'];
     const baselines = ['Foggy Input', 'Ground Truth'];
+
+    // Scene Definitions - Updated with actual filenames from directories
+    const sceneConfig = {
+        'ACDC': {
+            'Scene 1': 'GOPR0476_frame_000845_rgb_anon.png',
+            'Scene 2': 'GP010476_frame_000073_rgb_anon.png', 
+            'Scene 3': 'GP020475_frame_000109_rgb_anon.png'
+        },
+        'Cityscapes': {
+            'Frankfurt 1': 'frankfurt_000000_001236',
+            'Lindau': 'lindau_000055_000019',
+            'Frankfurt 2': 'frankfurt_000001_005184'
+        }
+    };
 
     // --- State Management ---
     let savedConfigs = {
@@ -455,14 +466,16 @@
         'filter-only': { stage1: filters[0], stage2: null },
         'model-only': { stage1: models[0], stage2: null },
         'filter-model': { stage1: filters[0], stage2: models[0] },
-        'model-filter': { stage1: models[0], stage2: filters[0] }
+        'model-filter': { stage1: models[0], stage2: filters[0] },
+        'vlm': { stage1: vlms[0], stage2: null }
     };
 
     let activeState = {
+        dataset: 'ACDC',
+        scene: 'Scene 1',
         strategy: 'baselines',
         stage1: 'Foggy Input',
-        stage2: null,
-        scene: 'Scene 1'
+        stage2: null
     };
 
     // --- Initialization ---
@@ -474,44 +487,38 @@
 
     // --- Logic ---
 
+    function setScene(dataset, sceneName, btn) {
+        activeState.dataset = dataset;
+        activeState.scene = sceneName;
+        
+        // Update UI: Remove active from ALL scene buttons first
+        document.querySelectorAll('.btn-scene').forEach(b => b.classList.remove('is-active'));
+        // Add active to clicked
+        btn.classList.add('is-active');
+
+        updateDisplay();
+    }
+
     function setStrategy(strategy) {
-        // Update active strategy
         activeState.strategy = strategy;
         
-        // Load the SAVED configuration for this strategy
         const config = savedConfigs[strategy];
         activeState.stage1 = config.stage1;
         activeState.stage2 = config.stage2;
 
         updateTabsUI();
         renderSelectors();
-        updateDisplay(); // Instant update
+        updateDisplay();
     }
     
-    // Called when a dropdown changes
     function updateSelection(stage, value) {
-        // 1. Update Active State
         if (stage === 1) activeState.stage1 = value;
         if (stage === 2) activeState.stage2 = value;
 
-        // 2. Update Saved Configs (Memory)
         savedConfigs[activeState.strategy].stage1 = activeState.stage1;
         savedConfigs[activeState.strategy].stage2 = activeState.stage2;
         
-        // 3. Update Badge Text for this strategy
         updateBadge(activeState.strategy);
-
-        updateDisplay(); // Instant update
-    }
-
-    function setScene(sceneName, btn) {
-        // Scenes update immediately
-        activeState.scene = sceneName;
-        
-        // Update UI
-        document.querySelectorAll('#scene-selector button').forEach(b => b.classList.remove('is-active'));
-        btn.classList.add('is-active');
-
         updateDisplay();
     }
 
@@ -525,7 +532,6 @@
         });
     }
 
-    // --- Badge Logic ---
     function updateAllBadges() {
         Object.keys(savedConfigs).forEach(strat => updateBadge(strat));
     }
@@ -537,83 +543,57 @@
 
         let text = '';
         if (strategy === 'filter-model' || strategy === 'model-filter') {
-            text = 'Chain'; // Keep chains short
+            text = 'Chain'; 
         } else {
             text = config.stage1;
         }
-        
-        // Truncate if very long manually if css fails (though CSS handles it)
-        if (text.length > 12) {
-            text = text.substring(0, 10) + '..';
-        }
-        
+        if (text.length > 12) text = text.substring(0, 10) + '..';
         badge.innerText = text;
     }
 
-
-    // Dynamic Selector Rendering based on Strategy
     function renderSelectors() {
         const container = document.getElementById('selector-container');
-        container.innerHTML = ''; // Clear current
+        container.innerHTML = ''; 
 
         const strat = activeState.strategy;
 
         if (strat === 'baselines') {
-            container.appendChild(createSelect('Baseline Method', baselines, activeState.stage1, (val) => {
-                updateSelection(1, val);
-            }));
+            container.appendChild(createSelect('Baseline Method', baselines, activeState.stage1, (val) => updateSelection(1, val)));
         }
         else if (strat === 'filter-only') {
-            container.appendChild(createSelect('Filter Method', filters, activeState.stage1, (val) => {
-                updateSelection(1, val);
-            }));
+            container.appendChild(createSelect('Filter Method', filters, activeState.stage1, (val) => updateSelection(1, val)));
         }
         else if (strat === 'model-only') {
-            container.appendChild(createSelect('Model Method', models, activeState.stage1, (val) => {
-                updateSelection(1, val);
-            }));
-        } 
+            container.appendChild(createSelect('Model Method', models, activeState.stage1, (val) => updateSelection(1, val)));
+        }
+        else if (strat === 'vlm') {
+            container.appendChild(createSelect('VLM Method', vlms, activeState.stage1, (val) => updateSelection(1, val)));
+        }
         else if (strat === 'filter-model') {
-            container.appendChild(createSelect('Step 1: Filter', filters, activeState.stage1, (val) => {
-                updateSelection(1, val);
-            }));
-            
+            container.appendChild(createSelect('Step 1: Filter', filters, activeState.stage1, (val) => updateSelection(1, val)));
             const arrow = document.createElement('div');
             arrow.innerHTML = '<i class="fas fa-arrow-right" style="color:#888; margin-top: 25px;"></i>';
             container.appendChild(arrow);
-            
-            container.appendChild(createSelect('Step 2: Model', models, activeState.stage2, (val) => {
-                updateSelection(2, val);
-            }));
+            container.appendChild(createSelect('Step 2: Model', models, activeState.stage2, (val) => updateSelection(2, val)));
         } 
         else if (strat === 'model-filter') {
-            container.appendChild(createSelect('Step 1: Model', models, activeState.stage1, (val) => {
-                updateSelection(1, val);
-            }));
-
-             const arrow = document.createElement('div');
-             arrow.innerHTML = '<i class="fas fa-arrow-right" style="color:#888; margin-top: 25px;"></i>';
-             container.appendChild(arrow);
-
-            container.appendChild(createSelect('Step 2: Filter', filters, activeState.stage2, (val) => {
-                updateSelection(2, val);
-            }));
+            container.appendChild(createSelect('Step 1: Model', models, activeState.stage1, (val) => updateSelection(1, val)));
+            const arrow = document.createElement('div');
+            arrow.innerHTML = '<i class="fas fa-arrow-right" style="color:#888; margin-top: 25px;"></i>';
+            container.appendChild(arrow);
+            container.appendChild(createSelect('Step 2: Filter', filters, activeState.stage2, (val) => updateSelection(2, val)));
         }
     }
 
-    // Helper to create Bulma select dropdowns
     function createSelect(label, options, selectedValue, onChange) {
         const wrapper = document.createElement('div');
         wrapper.className = 'select-wrapper';
-
         const labelEl = document.createElement('span');
         labelEl.className = 'select-label';
         labelEl.innerText = label;
         wrapper.appendChild(labelEl);
-
         const bulmaSelect = document.createElement('div');
         bulmaSelect.className = 'select';
-        
         const select = document.createElement('select');
         options.forEach(opt => {
             const option = document.createElement('option');
@@ -622,65 +602,142 @@
             if (opt === selectedValue) option.selected = true;
             select.appendChild(option);
         });
-
         select.addEventListener('change', (e) => onChange(e.target.value));
-        
         bulmaSelect.appendChild(select);
         wrapper.appendChild(bulmaSelect);
-        
         return wrapper;
     }
 
-    // --- Image Retrieval ---
+    // --- Path Generation Logic ---
 
-    function getCompositeKey() {
-        if (activeState.strategy === 'baselines' || activeState.strategy === 'filter-only' || activeState.strategy === 'model-only') {
-            return activeState.stage1;
+    function getFolderAndFile() {
+        const ds = activeState.dataset;
+        const strat = activeState.strategy;
+        const s1 = activeState.stage1;
+        const s2 = activeState.stage2;
+        const sceneKey = sceneConfig[ds][activeState.scene];
+        
+        const abbr1 = s1 ? methodMap[s1] : '';
+        const abbr2 = s2 ? methodMap[s2] : '';
+
+        if (ds === 'Cityscapes') {
+            // Extract city name from scene key
+            const city = sceneKey.split('_')[0]; // frankfurt, lindau, munster
+            let folder = '';
+            let suffix = '_leftImg8bit.png';
+
+            if (strat === 'baselines') {
+                if (s1 === 'Foggy Input') {
+                    folder = 'foggy_beta_0.01';
+                } else if (s1 === 'Ground Truth') {
+                    folder = 'leftImg8bit';
+                }
+            }
+            else if (strat === 'filter-only') {
+                // Filter-only uses foggy_beta_0.01_{filter} format
+                // CLAHE uses uppercase, others use lowercase
+                let filterSuffix = abbr1 === 'clh' ? 'CLAHE' : abbr1;
+                folder = `foggy_beta_0.01_${filterSuffix}`;
+            }
+            else if (strat === 'model-only') {
+                // Model-only uses b01_{model} format
+                folder = `b01_${abbr1}`;
+            }
+            else if (strat === 'vlm') {
+                // VLM uses b01_{vlm} format with special suffixes
+                folder = `b01_${abbr1}`;
+                if (s1 === 'Flux + CoT') {
+                    suffix = '_leftImg8bit_foggy_beta_0.01_defogged.png';
+                } else if (s1 === 'NanoBanana') {
+                    suffix = '_defogged_nano.png';
+                }
+            }
+            else if (strat === 'filter-model') {
+                // Filter then Model: b01_{filter}_{model}
+                // All use lowercase for filters in chains
+                folder = `b01_${abbr1}_${abbr2}`;
+            }
+            else if (strat === 'model-filter') {
+                // Model then Filter: b01_{model}_{filter}
+                // CLAHE uses lowercase 'clh' in chains
+                folder = `b01_${abbr1}_${abbr2}`;
+            }
+            
+            return `./static/foggy_cityscape/${folder}/val/${city}/${sceneKey}${suffix}`;
+
         } else {
-            return `${activeState.stage1} + ${activeState.stage2}`;
+            // ACDC Dataset
+            const filename = sceneKey;
+            let folder = '';
+            let suffix = '';
+
+            if (strat === 'baselines') {
+                if (s1 === 'Foggy Input') {
+                    folder = 'rgb_anon';
+                } else if (s1 === 'Ground Truth') {
+                    // GT has special nested structure
+                    const seq = filename.split('_')[0]; // GOPR0476 or GP010476 or GP020475
+                    const base = filename.replace('_rgb_anon.png', '');
+                    return `./static/ACDC/gt_panoptic/fog/val/${seq}/${base}_gt_panoptic.png`;
+                }
+            }
+            else if (strat === 'filter-only') {
+                folder = abbr1;
+            }
+            else if (strat === 'model-only') {
+                folder = abbr1;
+            }
+            else if (strat === 'vlm') {
+                // VLM methods use their abbreviation as folder name with special suffixes
+                folder = abbr1;
+                if (s1 === 'Flux + CoT') {
+                    // Replace _rgb_anon.png with _rgb_anon_defogged.png
+                    const base = filename.replace('_rgb_anon.png', '');
+                    return `./static/ACDC/${folder}/${base}_rgb_anon_defogged.png`;
+                } else if (s1 === 'NanoBanana') {
+                    // Replace .png with _defogged.png (keeps _rgb_anon)
+                    const base = filename.replace('.png', '');
+                    return `./static/ACDC/${folder}/${base}_defogged.png`;
+                }
+            }
+            else if (strat === 'filter-model') {
+                folder = `${abbr1}_${abbr2}`;
+            }
+            else if (strat === 'model-filter') {
+                // Model->Filter chains in ACDC use uppercase CLAHE
+                let filterAbbr = abbr2 === 'clh' ? 'CLAHE' : abbr2;
+                folder = `${abbr1}_${filterAbbr}`;
+            }
+            
+            return `./static/ACDC/${folder}/${filename}`;
         }
     }
 
     function updateDisplay() {
-        const key = getCompositeKey();
-        const scene = activeState.scene;
-
-        // DEBUG: Display current selection text
-        document.getElementById('method-debug').innerText = `Selected: ${key} on ${scene}`;
-
-        // 1. Try to fetch from hardcoded dictionary
-        let src = '';
+        const path = getFolderAndFile();
         
-        if (imagePaths[key] && imagePaths[key][scene]) {
-            src = imagePaths[key][scene];
-        } else {
-            // Fallback generation
-            const safeKey = encodeURIComponent(key);
-            const safeScene = encodeURIComponent(scene);
-            src = `https://placehold.co/800x400?text=${safeKey}+on+${safeScene}`;
-        }
+        // Debug Text
+        const stratInfo = (activeState.strategy.includes('chain') || activeState.strategy.includes('-')) 
+            ? `${activeState.stage1} + ${activeState.stage2 || ''}` 
+            : activeState.stage1;
+        document.getElementById('method-debug').innerText = 
+            `Dataset: ${activeState.dataset} | Scene: ${activeState.scene} | Method: ${stratInfo}\nPath: ${path}`;
 
         const img = document.getElementById('main-display');
         img.style.opacity = '0.5';
+        console.log('Loading image from path:', path);
+        console.log('Full URL:', new URL(path, window.location.href).href);
         setTimeout(() => {
-            img.src = src;
+            img.src = path;
             img.style.opacity = '1';
-        }, 150);
+        }, 50);
     }
-
-    // --- Hardcoded Image Paths ---
-    const imagePaths = {
-        'Foggy Input': {
-            'Scene 1': 'https://placehold.co/800x400?text=Foggy+Input+Scene+1',
-            'Scene 2': 'https://placehold.co/800x400?text=Foggy+Input+Scene+2',
-            'Scene 3': 'https://placehold.co/800x400?text=Foggy+Input+Scene+3'
-        },
-        'Ground Truth': {
-            'Scene 1': 'https://placehold.co/800x400?text=GT+Scene+1',
-            'Scene 2': 'https://placehold.co/800x400?text=GT+Scene+2',
-            'Scene 3': 'https://placehold.co/800x400?text=GT+Scene+3'
-        },
-    };
+    
+    function handleImageError(img) {
+        // Fallback to placeholder if local file is missing
+        const text = encodeURIComponent("Image Not Found\n" + activeState.dataset + "\n" + activeState.strategy);
+        img.src = `https://placehold.co/800x400?text=${text}`;
+    }
 
 </script>
 
