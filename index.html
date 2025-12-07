@@ -382,21 +382,82 @@
   </div>
 </section>
 
-<!-- ... (Rest of sections: Abstract, Quantitative Results, BibTeX, Footer) ... -->
 <section class="section">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered has-text-centered">
-        <div class="column is-four-fifths">
-          <h2 class="title is-3">Abstract</h2>
-          <div class="content has-text-justified">
-            <p>
-              Autonomous driving perception systems are particularly vulnerable in foggy conditions...
-            </p>
-          </div>
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Autonomous driving perception systems are particularly vulnerable in foggy conditions, where light scattering reduces contrast and obscures fine details critical for safe operation. While numerous defogging methods exist—from handcrafted filters to learned restoration models—improvements in image fidelity do not consistently translate into better downstream detection and segmentation.
+          </p>
+          <p>
+            We present a structured empirical study that benchmarks a comprehensive set of pipelines, including (i) classical filters, (ii) modern defogging networks, (iii) chained variants, and (iv) prompt-driven visual-language image editing models (VLM) applied directly to foggy images. Using Foggy Cityscapes, we assess both image quality and downstream performance on object detection (mAP) and segmentation (PQ, RQ, SQ).
+          </p>
         </div>
       </div>
     </div>
+  </div>
 </section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Quantitative Results</h2>
+    <div class="content">
+      <div class="table-container">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>mAP</th>
+              <th>PQ</th>
+              <th>RQ</th>
+              <th>SQ</th>
+              <th>Qual. Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background-color: #e8f5e9; font-weight: bold;">
+              <td>Ground Truth (GT)</td>
+              <td>0.2560</td>
+              <td>100.0</td>
+              <td>100.0</td>
+              <td>100.0</td>
+              <td>34.81</td>
+            </tr>
+            <tr>
+              <td>DehazeFormer Trained</td>
+              <td>0.2557</td>
+              <td>74.4</td>
+              <td>83.9</td>
+              <td>88.4</td>
+              <td>29.74</td>
+            </tr>
+            <tr>
+              <td>DehazeFormer Untrained</td>
+              <td>0.2379</td>
+              <td>63.0</td>
+              <td>74.2</td>
+              <td>84.6</td>
+              <td>24.20</td>
+            </tr>
+            <tr>
+              <td>Flux (CoT)</td>
+              <td>0.2376</td>
+              <td>59.7</td>
+              <td>82.8</td>
+              <td>71.7</td>
+              <td>26.19</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
 
 <section class="section" id="BibTeX">
   <div class="container is-max-desktop content">
@@ -409,13 +470,26 @@
 }</code></pre>
   </div>
 </section>
-
 <footer class="footer">
-    <div class="container">
-      <div class="content has-text-centered">
-        <p>Licensed under CC-BY-SA 4.0.</p>
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link" href="https://arxiv.org/abs/2510.03906">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/prazmara/defog-detection-benchmark">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+        </div>
       </div>
     </div>
+  </div>
 </footer>
 
 <script>
