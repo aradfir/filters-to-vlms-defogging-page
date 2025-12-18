@@ -264,14 +264,23 @@
                   <span>Code</span>
                   </a>
               </span>
-              <!-- Data Link. -->
+              <!-- Data Links. -->
               <span class="link-block">
                 <a href="https://www.cityscapes-dataset.com/dataset-overview/"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                       <i class="far fa-images"></i>
                   </span>
-                  <span>Dataset</span>
+                  <span>Cityscapes Dataset</span>
+                  </a>
+              </span>
+              <span class="link-block">
+                <a href="https://acdc.vision.ee.ethz.ch/"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="far fa-images"></i>
+                  </span>
+                  <span>ACDC Dataset</span>
                   </a>
               </span>
             </div>
@@ -390,10 +399,13 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            Autonomous driving perception systems are particularly vulnerable in foggy conditions, where light scattering reduces contrast and obscures fine details critical for safe operation. While numerous defogging methods exist—from handcrafted filters to learned restoration models—improvements in image fidelity do not consistently translate into better downstream detection and segmentation.
+            Autonomous driving perception systems are particularly vulnerable in foggy conditions, where light scattering reduces contrast and obscures fine details critical for safe operation. While numerous defogging methods exist, from handcrafted filters to learned restoration models, improvements in image fidelity do not consistently translate into better downstream detection and segmentation. Moreover, prior evaluations often rely on synthetic data, leaving questions about real-world transferability.
           </p>
           <p>
-            We present a structured empirical study that benchmarks a comprehensive set of pipelines, including (i) classical filters, (ii) modern defogging networks, (iii) chained variants, and (iv) prompt-driven visual-language image editing models (VLM) applied directly to foggy images. Using Foggy Cityscapes, we assess both image quality and downstream performance on object detection (mAP) and segmentation (PQ, RQ, SQ).
+            We present a structured empirical study that benchmarks a comprehensive set of pipelines, including (i) classical dehazing filters, (ii) modern defogging networks, (iii) chained variants (filter→model, model→filter), and (iv) prompt-driven visual-language image editing models (VLM) applied directly to foggy images. To address the gap between simulated and physical environments, we employ both the synthetic Foggy Cityscapes dataset and the real-world Adverse Conditions Dataset with Correspondences (ACDC).
+          </p>
+          <p>
+            Crucially, we examine the generalizability of these pipelines by evaluating performance on synthetic fog and real-world conditions. We assess both image quality and downstream performance in terms of object detection (mAP) and segmentation (PQ). Our analysis identifies when defogging is effective, the impact of combining models, and how VLMs compare to traditional approaches. Additionally, to evaluate the quality of dehazed images, we report qualitative rubric-based scores from both VLM and human judges, and discuss their alignment with down-stream task metrics, revealing reasonable correlations with mAP. Together, these results establish a transparent, task-oriented benchmark for defogging methods and highlight the conditions under which pre-processing genuinely enhances autonomous perception in adverse weather conditions.
           </p>
         </div>
       </div>
@@ -405,51 +417,352 @@
 <section class="section">
   <div class="container is-max-desktop">
     <h2 class="title is-3 has-text-centered">Quantitative Results</h2>
+    
+    <!-- Main Performance Table -->
     <div class="content">
+      <h3 class="title is-5 has-text-centered">Detection and Segmentation Performance</h3>
+      <p class="has-text-centered" style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
+        mAP is reported in percentage (%), and PQ scores for Cityscapes are normalized relative to the ground truth image.
+      </p>
       <div class="table-container">
-        <table class="results-table">
+        <table class="table is-striped is-hoverable is-fullwidth" style="font-size: 0.9rem;">
+          <thead>
+            <tr>
+              <th>Base Method</th>
+              <th>Next Method</th>
+              <th colspan="2" style="text-align: center; border-left: 2px solid #ddd;">Cityscapes</th>
+              <th colspan="2" style="text-align: center; border-left: 2px solid #ddd;">ACDC</th>
+            </tr>
+            <tr>
+              <th></th>
+              <th></th>
+              <th style="border-left: 2px solid #ddd;">mAP%</th>
+              <th>PQ</th>
+              <th style="border-left: 2px solid #ddd;">mAP%</th>
+              <th>PQ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background-color: #e8f5e9; font-weight: bold;">
+              <td>GT</td>
+              <td>None</td>
+              <td style="border-left: 2px solid #ddd;"><strong>25.60</strong></td>
+              <td><strong>100.0</strong></td>
+              <td style="border-left: 2px solid #ddd;">N/A</td>
+              <td>N/A</td>
+            </tr>
+            <tr>
+              <td>Foggy</td>
+              <td>None</td>
+              <td style="border-left: 2px solid #ddd;">22.95</td>
+              <td>57.9</td>
+              <td style="border-left: 2px solid #ddd;"><strong>37.32</strong></td>
+              <td><strong>48.5</strong></td>
+            </tr>
+            <tr style="border-top: 2px solid #ddd;">
+              <td rowspan="4" style="vertical-align: middle;"><strong>DehazeFormer(Tr)</strong></td>
+              <td>None</td>
+              <td style="border-left: 2px solid #ddd;"><strong>25.57</strong></td>
+              <td><strong>74.4</strong></td>
+              <td style="border-left: 2px solid #ddd;"><strong>35.63</strong></td>
+              <td><strong>44.5</strong></td>
+            </tr>
+            <tr>
+              <td>CLAHE</td>
+              <td style="border-left: 2px solid #ddd;">25.55</td>
+              <td>70.3</td>
+              <td style="border-left: 2px solid #ddd;">35.06</td>
+              <td>38.5</td>
+            </tr>
+            <tr>
+              <td>MSR</td>
+              <td style="border-left: 2px solid #ddd;">25.30</td>
+              <td>59.4</td>
+              <td style="border-left: 2px solid #ddd;">31.05</td>
+              <td>35.0</td>
+            </tr>
+            <tr>
+              <td>DCP</td>
+              <td style="border-left: 2px solid #ddd;">24.52</td>
+              <td>69.9</td>
+              <td style="border-left: 2px solid #ddd;">34.17</td>
+              <td>38.0</td>
+            </tr>
+            <tr style="border-top: 2px solid #ddd;">
+              <td rowspan="4" style="vertical-align: middle;"><strong>DehazeFormer</strong></td>
+              <td>None</td>
+              <td style="border-left: 2px solid #ddd;">23.79</td>
+              <td>63.0</td>
+              <td style="border-left: 2px solid #ddd;"><strong>38.04</strong></td>
+              <td><strong>48.0</strong></td>
+            </tr>
+            <tr>
+              <td>CLAHE</td>
+              <td style="border-left: 2px solid #ddd;"><strong>24.45</strong></td>
+              <td>62.4</td>
+              <td style="border-left: 2px solid #ddd;">37.98</td>
+              <td>46.6</td>
+            </tr>
+            <tr>
+              <td>DCP</td>
+              <td style="border-left: 2px solid #ddd;">24.09</td>
+              <td><strong>64.2</strong></td>
+              <td style="border-left: 2px solid #ddd;">34.18</td>
+              <td>42.1</td>
+            </tr>
+            <tr>
+              <td>MSR</td>
+              <td style="border-left: 2px solid #ddd;">23.36</td>
+              <td>59.4</td>
+              <td style="border-left: 2px solid #ddd;">33.89</td>
+              <td>43.9</td>
+            </tr>
+            <tr style="border-top: 2px solid #ddd;">
+              <td rowspan="5" style="vertical-align: middle;"><strong>CLAHE</strong></td>
+              <td>None</td>
+              <td style="border-left: 2px solid #ddd;">23.83</td>
+              <td>58.0</td>
+              <td style="border-left: 2px solid #ddd;">37.73</td>
+              <td><strong>47.0</strong></td>
+            </tr>
+            <tr>
+              <td>Dehaze(Tr)</td>
+              <td style="border-left: 2px solid #ddd;"><strong>25.05</strong></td>
+              <td><strong>69.9</strong></td>
+              <td style="border-left: 2px solid #ddd;">34.77</td>
+              <td>40.7</td>
+            </tr>
+            <tr>
+              <td>Dehaze</td>
+              <td style="border-left: 2px solid #ddd;">24.10</td>
+              <td>61.1</td>
+              <td style="border-left: 2px solid #ddd;"><strong>37.97</strong></td>
+              <td>46.8</td>
+            </tr>
+            <tr>
+              <td>FocalNet</td>
+              <td style="border-left: 2px solid #ddd;">23.85</td>
+              <td>60.9</td>
+              <td style="border-left: 2px solid #ddd;">37.88</td>
+              <td>46.7</td>
+            </tr>
+            <tr>
+              <td>MITNet</td>
+              <td style="border-left: 2px solid #ddd;">23.28</td>
+              <td>56.1</td>
+              <td style="border-left: 2px solid #ddd;">32.59</td>
+              <td>46.0</td>
+            </tr>
+            <tr style="border-top: 2px solid #ddd;">
+              <td rowspan="5" style="vertical-align: middle;"><strong>MSR</strong></td>
+              <td>None</td>
+              <td style="border-left: 2px solid #ddd;">23.18</td>
+              <td>50.7</td>
+              <td style="border-left: 2px solid #ddd;">33.46</td>
+              <td><strong>44.5</strong></td>
+            </tr>
+            <tr>
+              <td>Dehaze(Tr)</td>
+              <td style="border-left: 2px solid #ddd;"><strong>24.35</strong></td>
+              <td><strong>53.2</strong></td>
+              <td style="border-left: 2px solid #ddd;">32.09</td>
+              <td>31.8</td>
+            </tr>
+            <tr>
+              <td>Dehaze</td>
+              <td style="border-left: 2px solid #ddd;">23.43</td>
+              <td>51.5</td>
+              <td style="border-left: 2px solid #ddd;"><strong>34.74</strong></td>
+              <td>44.4</td>
+            </tr>
+            <tr>
+              <td>FocalNet</td>
+              <td style="border-left: 2px solid #ddd;">23.51</td>
+              <td>51.7</td>
+              <td style="border-left: 2px solid #ddd;">33.74</td>
+              <td>44.4</td>
+            </tr>
+            <tr>
+              <td>MITNet</td>
+              <td style="border-left: 2px solid #ddd;">23.38</td>
+              <td>57.9</td>
+              <td style="border-left: 2px solid #ddd;">33.04</td>
+              <td>34.1</td>
+            </tr>
+            <tr style="border-top: 2px solid #ddd;">
+              <td rowspan="5" style="vertical-align: middle;"><strong>DCP</strong></td>
+              <td>None</td>
+              <td style="border-left: 2px solid #ddd;">23.69</td>
+              <td>64.0</td>
+              <td style="border-left: 2px solid #ddd;"><strong>35.08</strong></td>
+              <td><strong>43.0</strong></td>
+            </tr>
+            <tr>
+              <td>Dehaze(Tr)</td>
+              <td style="border-left: 2px solid #ddd;"><strong>23.76</strong></td>
+              <td><strong>64.8</strong></td>
+              <td style="border-left: 2px solid #ddd;">33.14</td>
+              <td>36.1</td>
+            </tr>
+            <tr>
+              <td>Dehaze</td>
+              <td style="border-left: 2px solid #ddd;">23.45</td>
+              <td>64.2</td>
+              <td style="border-left: 2px solid #ddd;">34.14</td>
+              <td>42.3</td>
+            </tr>
+            <tr>
+              <td>MITNet</td>
+              <td style="border-left: 2px solid #ddd;">23.58</td>
+              <td>59.5</td>
+              <td style="border-left: 2px solid #ddd;">6.51</td>
+              <td>9.7</td>
+            </tr>
+            <tr>
+              <td>FocalNet</td>
+              <td style="border-left: 2px solid #ddd;">23.47</td>
+              <td>63.6</td>
+              <td style="border-left: 2px solid #ddd;">34.58</td>
+              <td>42.4</td>
+            </tr>
+            <tr style="border-top: 2px solid #ddd;">
+              <td rowspan="4" style="vertical-align: middle;"><strong>FocalNet</strong></td>
+              <td>None</td>
+              <td style="border-left: 2px solid #ddd;">23.53</td>
+              <td>62.6</td>
+              <td style="border-left: 2px solid #ddd;"><strong>37.27</strong></td>
+              <td><strong>48.0</strong></td>
+            </tr>
+            <tr>
+              <td>CLAHE</td>
+              <td style="border-left: 2px solid #ddd;"><strong>23.85</strong></td>
+              <td>60.4</td>
+              <td style="border-left: 2px solid #ddd;">37.32</td>
+              <td>45.5</td>
+            </tr>
+            <tr>
+              <td>DCP</td>
+              <td style="border-left: 2px solid #ddd;">23.56</td>
+              <td><strong>62.8</strong></td>
+              <td style="border-left: 2px solid #ddd;">34.47</td>
+              <td>41.3</td>
+            </tr>
+            <tr>
+              <td>MSR</td>
+              <td style="border-left: 2px solid #ddd;">21.71</td>
+              <td>51.7</td>
+              <td style="border-left: 2px solid #ddd;">32.77</td>
+              <td>43.4</td>
+            </tr>
+            <tr style="border-top: 2px solid #ddd;">
+              <td rowspan="4" style="vertical-align: middle;"><strong>MITNet</strong></td>
+              <td>None</td>
+              <td style="border-left: 2px solid #ddd;">22.51</td>
+              <td><strong>57.9</strong></td>
+              <td style="border-left: 2px solid #ddd;"><strong>28.32</strong></td>
+              <td><strong>31.5</strong></td>
+            </tr>
+            <tr>
+              <td>CLAHE</td>
+              <td style="border-left: 2px solid #ddd;"><strong>22.79</strong></td>
+              <td>56.1</td>
+              <td style="border-left: 2px solid #ddd;">28.13</td>
+              <td>27.9</td>
+            </tr>
+            <tr>
+              <td>DCP</td>
+              <td style="border-left: 2px solid #ddd;">22.38</td>
+              <td>56.8</td>
+              <td style="border-left: 2px solid #ddd;">27.89</td>
+              <td>22.7</td>
+            </tr>
+            <tr>
+              <td>MSR</td>
+              <td style="border-left: 2px solid #ddd;">21.51</td>
+              <td>51.0</td>
+              <td style="border-left: 2px solid #ddd;">22.68</td>
+              <td>25.2</td>
+            </tr>
+            <tr style="border-top: 2px solid #ddd;">
+              <td rowspan="2" style="vertical-align: middle;"><strong>Flux</strong></td>
+              <td>CoT Prompt</td>
+              <td style="border-left: 2px solid #ddd;"><strong>23.76</strong></td>
+              <td><strong>59.7</strong></td>
+              <td style="border-left: 2px solid #ddd;"><strong>37.78</strong></td>
+              <td><strong>46.6</strong></td>
+            </tr>
+            <tr>
+              <td>Base Prompt</td>
+              <td style="border-left: 2px solid #ddd;">23.06</td>
+              <td>55.5</td>
+              <td style="border-left: 2px solid #ddd;">29.47</td>
+              <td>43.2</td>
+            </tr>
+            <tr style="border-top: 2px solid #ddd;">
+              <td><strong>NanoBanana</strong></td>
+              <td>Base Prompt</td>
+              <td style="border-left: 2px solid #ddd;">19.41</td>
+              <td>61.2</td>
+              <td style="border-left: 2px solid #ddd;">23.48</td>
+              <td>39.8</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Qualitative Metrics Table -->
+    <div class="content" style="margin-top: 3rem;">
+      <h3 class="title is-5 has-text-centered">Qualitative VLM-Judge Metrics</h3>
+      <p class="has-text-centered" style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
+        Scores from 0 to 5. All models applied to Cityscapes Dataset. Values in parentheses indicate average human judge scores.
+      </p>
+      <div class="table-container">
+        <table class="table is-striped is-hoverable" style="margin: 0 auto; max-width: 700px; font-size: 0.9rem;">
           <thead>
             <tr>
               <th>Method</th>
-              <th>mAP</th>
-              <th>PQ</th>
-              <th>RQ</th>
-              <th>SQ</th>
-              <th>Qual. Score</th>
+              <th style="text-align: center;">Visibility<br>Restoration</th>
+              <th style="text-align: center;">Boundary<br>Clarity</th>
+              <th style="text-align: center;">Perceived<br>Detectability</th>
             </tr>
           </thead>
           <tbody>
             <tr style="background-color: #e8f5e9; font-weight: bold;">
               <td>Ground Truth (GT)</td>
-              <td>0.2560</td>
-              <td>100.0</td>
-              <td>100.0</td>
-              <td>100.0</td>
-              <td>34.81</td>
+              <td style="text-align: center;">4.95</td>
+              <td style="text-align: center;">4.95</td>
+              <td style="text-align: center;">4.95</td>
             </tr>
             <tr>
-              <td>DehazeFormer Trained</td>
-              <td>0.2557</td>
-              <td>74.4</td>
-              <td>83.9</td>
-              <td>88.4</td>
-              <td>29.74</td>
+              <td>Flux (Optimized Prompt)</td>
+              <td style="text-align: center;"><strong>4.30</strong> (3.95)</td>
+              <td style="text-align: center;">3.92 (3.28)</td>
+              <td style="text-align: center;"><strong>4.22</strong> (4.12)</td>
             </tr>
             <tr>
-              <td>DehazeFormer Untrained</td>
-              <td>0.2379</td>
-              <td>63.0</td>
-              <td>74.2</td>
-              <td>84.6</td>
-              <td>24.20</td>
+              <td>Flux (Baseline Prompt)</td>
+              <td style="text-align: center;">1.22 (2.32)</td>
+              <td style="text-align: center;">1.21 (1.43)</td>
+              <td style="text-align: center;">1.22 (1.58)</td>
             </tr>
             <tr>
-              <td>Flux (CoT)</td>
-              <td>0.2376</td>
-              <td>59.7</td>
-              <td>82.8</td>
-              <td>71.7</td>
-              <td>26.19</td>
+              <td>DehazeFormer (Trained)</td>
+              <td style="text-align: center;">4.07 (3.74)</td>
+              <td style="text-align: center;"><strong>3.96</strong> (3.55)</td>
+              <td style="text-align: center;">4.07 (3.95)</td>
+            </tr>
+            <tr>
+              <td>DehazeFormer</td>
+              <td style="text-align: center;">2.17 (2.40)</td>
+              <td style="text-align: center;">2.17 (2.65)</td>
+              <td style="text-align: center;">2.18 (1.95)</td>
+            </tr>
+            <tr>
+              <td>NanoBanana</td>
+              <td style="text-align: center;">2.44 (2.35)</td>
+              <td style="text-align: center;">2.44 (2.85)</td>
+              <td style="text-align: center;">2.44 (3.05)</td>
             </tr>
           </tbody>
         </table>
