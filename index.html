@@ -312,9 +312,9 @@
           <div class="scene-row">
               <div class="scene-row-label">Foggy Cityscapes</div>
               <div class="scene-row-buttons">
-                  <button class="btn-scene" onclick="setScene('Cityscapes', 'Frankfurt 1', this)">Frankfurt 1</button>
-                  <button class="btn-scene" onclick="setScene('Cityscapes', 'Lindau', this)">Lindau</button>
-                  <button class="btn-scene" onclick="setScene('Cityscapes', 'Frankfurt 2', this)">Frankfurt 2</button>
+                  <button class="btn-scene" onclick="setScene('Cityscapes', 'Scene 1', this)">Scene 1</button>
+                  <button class="btn-scene" onclick="setScene('Cityscapes', 'Scene 2', this)">Scene 2</button>
+                  <button class="btn-scene" onclick="setScene('Cityscapes', 'Scene 3', this)">Scene 3</button>
               </div>
           </div>
       </div>
@@ -826,31 +826,31 @@
         'DehazeFormer (Base)': 'dhf',
         'DehazeFormer (Retrained)': 'dhft',
         'FocalNet': 'fcn',
-        'Flux': 'flux',
         'MITNet': 'mit',
         
         // VLMs
         'NanoBanana': 'nanobanana',
-        'Flux + CoT': 'flux_cot'
+        'Flux + CoT': 'flux_cot',
+        'Flux (Base)': 'flux_base',
     };
     
     // Reverse map for labels
     const filters = ['CLAHE', 'DCP', 'MSR'];
     const models = ['DehazeFormer (Base)', 'DehazeFormer (Retrained)', 'FocalNet', 'MITNet'];
-    const vlms = ['NanoBanana', 'Flux + CoT'];
+    const vlms = ['Flux + CoT', 'Flux (Base)', 'NanoBanana'];
     const baselines = ['Foggy Input', 'Ground Truth'];
 
     // Scene Definitions - Updated with actual filenames from directories
     const sceneConfig = {
         'ACDC': {
             'Scene 1': 'GOPR0476_frame_000845_rgb_anon.png',
-            'Scene 2': 'GP010476_frame_000073_rgb_anon.png', 
-            'Scene 3': 'GP020475_frame_000109_rgb_anon.png'
+            'Scene 2': 'GOPR0476_frame_000884_rgb_anon.png', 
+            'Scene 3': 'GOPR0476_frame_000921_rgb_anon.png'
         },
         'Cityscapes': {
-            'Frankfurt 1': 'frankfurt_000000_001236',
-            'Lindau': 'lindau_000055_000019',
-            'Frankfurt 2': 'frankfurt_000001_005184'
+            'Scene 1': 'frankfurt_000000_001236',
+            'Scene 2': 'frankfurt_000000_016286',
+            'Scene 3': 'frankfurt_000000_003357'
         }
     };
 
@@ -1042,6 +1042,8 @@
                 folder = `b01_${abbr1}`;
                 if (s1 === 'Flux + CoT') {
                     suffix = '_leftImg8bit_foggy_beta_0.01_defogged.png';
+                } else if (s1 === 'Flux (Base)') {
+                    suffix = '_leftImg8bit_foggy_beta_0.01_defogged.png';
                 } else if (s1 === 'NanoBanana') {
                     suffix = '_defogged_nano.png';
                 }
@@ -1085,6 +1087,10 @@
                 // VLM methods use their abbreviation as folder name with special suffixes
                 folder = abbr1;
                 if (s1 === 'Flux + CoT') {
+                    // Replace _rgb_anon.png with _rgb_anon_defogged.png
+                    const base = filename.replace('_rgb_anon.png', '');
+                    return `./static/ACDC/${folder}/${base}_rgb_anon_defogged.png`;
+                } else if (s1 === 'Flux (Base)') {
                     // Replace _rgb_anon.png with _rgb_anon_defogged.png
                     const base = filename.replace('_rgb_anon.png', '');
                     return `./static/ACDC/${folder}/${base}_rgb_anon_defogged.png`;
